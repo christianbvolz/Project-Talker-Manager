@@ -4,5 +4,4 @@ const rand = () => Math.random().toString(36).substr(2);
 
 const generateToken = () => (rand() + rand()).slice(0, 16);
 
-console.log(generateToken());
 module.exports = generateToken;
