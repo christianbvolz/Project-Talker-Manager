@@ -53,6 +53,15 @@ app.post('/login', validateLogin, (_req, res) => {
   res.status(HTTP_OK_STATUS).json({ token: generateToken() });
 });
 
+app.delete('/talker/:id', validateToken, rescue(async (req, res) => {
+    const { id } = req.params;
+    const talkers = await fs.readFile(TALKER_PATH, 'utf-8')
+      .then((result) => JSON.parse(result)) || [];
+    const filteredTalkers = talkers.filter((tal) => tal.id !== +id);
+    await fs.writeFile(TALKER_PATH, JSON.stringify(filteredTalkers));
+    res.status(204).end();
+}));
+
 app.post('/talker',
   validateToken,
   validateName,
