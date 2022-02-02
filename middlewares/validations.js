@@ -1,3 +1,18 @@
+const isemail = require('email-format-check');
+
+const validateLogin = (req, res, next) => {
+  const { email, password } = req.body;
+  if (!email) return res.status(400).json({ message: 'O campo "email" é obrigatório' });
+  if (!password) return res.status(400).json({ message: 'O campo "password" é obrigatório' });
+  if (!isemail(email)) {
+    return res.status(400).json({ message: 'O "email" deve ter o formato "email@email.com"' });
+  }
+  if (password.length < 6) {
+    return res.status(400).json({ message: 'O "password" deve ter pelo menos 6 caracteres' });
+  }
+  next();
+};
+
 const validateToken = (req, res, next) => {
   const { authorization } = req.headers;
   if (!authorization) return res.status(401).json({ message: 'Token não encontrado' });
@@ -49,13 +64,18 @@ const validateWatchedAt = (req, res, next) => {
   next();
 };
 
-const validateRate = (req, res, next) => {
+const validateRate1 = (req, res, next) => {
   const { talk: { rate } } = req.body;
-  if (!rate) {
+  if (!rate && rate !== 0) {
     return res.status(400).json({
       message: 'O campo "talk" é obrigatório e "watchedAt" e "rate" não podem ser vazios',
       });
   }
+  next();
+};
+
+const validateRate2 = (req, res, next) => {
+  const { talk: { rate } } = req.body;
   if (rate !== Math.trunc(rate) || rate > 5 || rate < 1) {
     return res.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
   }
@@ -63,10 +83,12 @@ const validateRate = (req, res, next) => {
 };
 
 module.exports = {
+  validateLogin,
   validateToken,
   validateName,
   validateAge,
   validateTalk,
   validateWatchedAt,
-  validateRate,
+  validateRate1,
+  validateRate2,
 };
