@@ -37,6 +37,16 @@ app.get('/talker', rescue(async (_req, res) => {
   res.status(HTTP_OK_STATUS).json(talkers);
 }));
 
+app.get('/talker/search', validateToken, rescue(async (req, res) => {
+  const { q } = req.query;
+  console.log(q);
+  const talkers = await fs.readFile(TALKER_PATH, 'utf-8')
+  .then((result) => JSON.parse(result)) || [];
+  if (!q) return res.status(HTTP_OK_STATUS).json(talkers);
+  const filteredTalkers = talkers.filter(({ name }) => name.includes(q)) || [];
+  res.status(HTTP_OK_STATUS).json(filteredTalkers);
+}));
+
 app.get('/talker/:id', rescue(async (req, res) => {
   const { id } = req.params;
   const talkers = await fs.readFile(TALKER_PATH, 'utf-8')
@@ -63,41 +73,41 @@ app.delete('/talker/:id', validateToken, rescue(async (req, res) => {
 }));
 
 app.post('/talker',
-  validateToken,
-  validateName,
-  validateAge,
-  validateTalk,
-  validateWatchedAt,
-  validateRate1,
-  validateRate2,
-  rescue(async (req, res) => {
-    const { name, age, talk } = req.body;
-    const talkers = await fs.readFile(TALKER_PATH, 'utf-8')
-      .then((result) => JSON.parse(result)) || [];
-    const newTalker = { id: talkers.length + 1, name, age, talk };
-    talkers.push(newTalker);
-    await fs.writeFile(TALKER_PATH, JSON.stringify(talkers));
-    res.status(201).json(newTalker);
+validateToken,
+validateName,
+validateAge,
+validateTalk,
+validateWatchedAt,
+validateRate1,
+validateRate2,
+rescue(async (req, res) => {
+  const { name, age, talk } = req.body;
+  const talkers = await fs.readFile(TALKER_PATH, 'utf-8')
+  .then((result) => JSON.parse(result)) || [];
+  const newTalker = { id: talkers.length + 1, name, age, talk };
+  talkers.push(newTalker);
+  await fs.writeFile(TALKER_PATH, JSON.stringify(talkers));
+  res.status(201).json(newTalker);
 }));
 
 app.put('/talker/:id',
-  validateToken,
-  validateName,
-  validateAge,
-  validateTalk,
-  validateWatchedAt,
-  validateRate1,
-  validateRate2,
-  rescue(async (req, res) => {
-    const { id } = req.params;
-    const { name, age, talk } = req.body;
-    const newTalker = { id: +id, name, age, talk };
-    const talkers = await fs.readFile(TALKER_PATH, 'utf-8')
-      .then((result) => JSON.parse(result)) || [];
-    const filteredTalkers = talkers.filter((tal) => tal.id !== +id);
-    filteredTalkers.push(newTalker);
-    await fs.writeFile(TALKER_PATH, JSON.stringify(filteredTalkers));
-    res.status(200).json(newTalker);
+validateToken,
+validateName,
+validateAge,
+validateTalk,
+validateWatchedAt,
+validateRate1,
+validateRate2,
+rescue(async (req, res) => {
+  const { id } = req.params;
+  const { name, age, talk } = req.body;
+  const newTalker = { id: +id, name, age, talk };
+  const talkers = await fs.readFile(TALKER_PATH, 'utf-8')
+  .then((result) => JSON.parse(result)) || [];
+  const filteredTalkers = talkers.filter((tal) => tal.id !== +id);
+  filteredTalkers.push(newTalker);
+  await fs.writeFile(TALKER_PATH, JSON.stringify(filteredTalkers));
+  res.status(200).json(newTalker);
 }));
 
 app.listen(PORT, () => {
